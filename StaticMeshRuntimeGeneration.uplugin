@@ -1,0 +1,30 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "StaticMeshRuntimeGeneration",
+	"Description": "Assets and functions to store mesh descriptors from static meshes needed to create derived static meshes at runtime",
+	"Category": "Other",
+	"CreatedBy": "Daniel Amthauer",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": true,
+	"Installed": false,
+	"EnabledByDefault": false,
+	"Modules": [
+		{
+			"Name": "StaticMeshRuntimeGeneration",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"name": "StaticMeshRuntimeGenerationEditor",
+			"type": "Editor",
+			"loadingPhase": "PostEngineInit"
+		}
+	]
+}
