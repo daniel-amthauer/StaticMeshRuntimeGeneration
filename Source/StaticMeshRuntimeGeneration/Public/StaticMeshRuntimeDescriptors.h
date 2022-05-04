@@ -22,6 +22,9 @@ public:
 
 	virtual void Serialize(FArchive& Ar) override;
 
+	UFUNCTION(BlueprintCallable)
+	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptors(UStaticMeshRuntimeDescriptors* Descriptors);
+
 #if WITH_EDITOR
 	UFUNCTION(CallInEditor)
 	void RefreshDescriptors();
