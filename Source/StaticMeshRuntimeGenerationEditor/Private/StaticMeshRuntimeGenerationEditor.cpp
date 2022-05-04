@@ -1,17 +1,22 @@
 #include "StaticMeshRuntimeGenerationEditor.h"
 
+#include "AssetToolsModule.h"
+#include "AssetTypeActions_StaticMeshRuntimeDescriptors.h"
+
 DEFINE_LOG_CATEGORY(StaticMeshRuntimeGenerationEditor);
 
 #define LOCTEXT_NAMESPACE "FStaticMeshRuntimeGenerationEditor"
 
 void FStaticMeshRuntimeGenerationEditor::StartupModule()
 {
-	UE_LOG(StaticMeshRuntimeGenerationEditor, Warning, TEXT("StaticMeshRuntimeGenerationEditor module has been loaded"));
+	// Register the editor asset type actions.
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	AssetTools.RegisterAssetTypeActions(MakeShared<FAssetTypeActions_StaticMeshRuntimeDescriptors>(EAssetTypeCategories::Misc));
 }
 
 void FStaticMeshRuntimeGenerationEditor::ShutdownModule()
 {
-	UE_LOG(StaticMeshRuntimeGenerationEditor, Warning, TEXT("StaticMeshRuntimeGenerationEditor module has been unloaded"));
+	
 }
 
 #undef LOCTEXT_NAMESPACE

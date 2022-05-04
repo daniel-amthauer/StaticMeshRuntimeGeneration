@@ -21,4 +21,9 @@ public:
 	TArray<FMeshDescription> MeshDescriptions;
 
 	virtual void Serialize(FArchive& Ar) override;
+
+#if WITH_EDITOR
+	UFUNCTION(CallInEditor)
+	void RefreshDescriptors();
+#endif
 };

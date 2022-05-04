@@ -11,10 +11,15 @@ class UStaticMeshRuntimeDescriptorsFactory : public UFactory
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(Transient)
+	UStaticMesh* OriginalMesh;
+	
 	UStaticMeshRuntimeDescriptorsFactory();
 
 	//~ Begin UFactory Interface
+	virtual bool ConfigureProperties() override;
 	virtual UObject* FactoryCreateNew(UClass* Class,UObject* InParent,FName Name,EObjectFlags Flags,UObject* Context,FFeedbackContext* Warn) override;
+	virtual FString GetDefaultNewAssetName() const override;
 	//~ Begin UFactory Interface	
 };
 
