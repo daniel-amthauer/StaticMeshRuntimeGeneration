@@ -1,9 +1,9 @@
-#include "StaticMeshRuntimeDescriptorsFactory.h"
+#include "StaticMeshRuntimeDescriptorFactory.h"
 
 #include "ContentBrowserDelegates.h"
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
-#include "StaticMeshRuntimeDescriptors.h"
+#include "StaticMeshRuntimeDescriptor.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
 
 /*------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ public:
 	}
 	
 	/** Sets properties for the supplied AnimBlueprintFactory */
-	bool ConfigureProperties(TWeakObjectPtr<UStaticMeshRuntimeDescriptorsFactory> InAnimBlueprintFactory)
+	bool ConfigureProperties(TWeakObjectPtr<UStaticMeshRuntimeDescriptorFactory> InAnimBlueprintFactory)
 	{
 		StaticMeshRuntimeDescriptorsFactory = InAnimBlueprintFactory;
 
@@ -205,7 +205,7 @@ private:
 
 private:
 	/** The factory for which we are setting up properties */
-	TWeakObjectPtr<UStaticMeshRuntimeDescriptorsFactory> StaticMeshRuntimeDescriptorsFactory;
+	TWeakObjectPtr<UStaticMeshRuntimeDescriptorFactory> StaticMeshRuntimeDescriptorsFactory;
 
 	/** The container for the target skeleton picker*/
 	TSharedPtr<SVerticalBox> StaticMeshContainer;
@@ -223,35 +223,35 @@ private:
 	bool bOkClicked;
 };
 
-UStaticMeshRuntimeDescriptorsFactory::UStaticMeshRuntimeDescriptorsFactory()
+UStaticMeshRuntimeDescriptorFactory::UStaticMeshRuntimeDescriptorFactory()
 {
-	SupportedClass = UStaticMeshRuntimeDescriptors::StaticClass();
+	SupportedClass = UStaticMeshRuntimeDescriptor::StaticClass();
 	bCreateNew = true;
 	bEditAfterNew = true;
 }
 
-bool UStaticMeshRuntimeDescriptorsFactory::ConfigureProperties()
+bool UStaticMeshRuntimeDescriptorFactory::ConfigureProperties()
 {
 	const TSharedRef<SStaticMeshRuntimeDescriptorsCreateDialog> Dialog = SNew(SStaticMeshRuntimeDescriptorsCreateDialog);
 	return Dialog->ConfigureProperties(this);
 }
 
-UObject* UStaticMeshRuntimeDescriptorsFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
+UObject* UStaticMeshRuntimeDescriptorFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
 	check(Class == SupportedClass);
-	UStaticMeshRuntimeDescriptors* Asset = NewObject<UStaticMeshRuntimeDescriptors>(InParent, Name, Flags);
+	UStaticMeshRuntimeDescriptor* Asset = NewObject<UStaticMeshRuntimeDescriptor>(InParent, Name, Flags);
 	Asset->OriginalMesh = OriginalMesh;
 	Asset->RefreshDescriptors();
 	return Asset;
 }
 
-FString UStaticMeshRuntimeDescriptorsFactory::GetDefaultNewAssetName() const
+FString UStaticMeshRuntimeDescriptorFactory::GetDefaultNewAssetName() const
 {
 	if (OriginalMesh)
 	{
 		FString StaticMeshName = OriginalMesh->GetName();
 		StaticMeshName.RemoveFromStart(TEXT("SM_"));
-		return MakeUniqueObjectName(nullptr, UStaticMeshRuntimeDescriptors::StaticClass(), FName(FString::Printf(TEXT("SMRD_%s"), *StaticMeshName))).ToString();
+		return MakeUniqueObjectName(nullptr, UStaticMeshRuntimeDescriptor::StaticClass(), FName(FString::Printf(TEXT("SMRD_%s"), *StaticMeshName))).ToString();
 	}
 	return Super::GetDefaultNewAssetName();
 }

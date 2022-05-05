@@ -1,7 +1,7 @@
 #include "StaticMeshRuntimeGenerationEditor.h"
 
 #include "AssetToolsModule.h"
-#include "AssetTypeActions_StaticMeshRuntimeDescriptors.h"
+#include "AssetTypeActions_StaticMeshRuntimeDescriptor.h"
 
 DEFINE_LOG_CATEGORY(StaticMeshRuntimeGenerationEditor);
 
@@ -11,7 +11,7 @@ void FStaticMeshRuntimeGenerationEditor::StartupModule()
 {
 	// Register the editor asset type actions.
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	AssetTools.RegisterAssetTypeActions(MakeShared<FAssetTypeActions_StaticMeshRuntimeDescriptors>(EAssetTypeCategories::Misc));
+	AssetTools.RegisterAssetTypeActions(MakeShared<FAssetTypeActions_StaticMeshRuntimeDescriptor>(EAssetTypeCategories::Misc));
 }
 
 void FStaticMeshRuntimeGenerationEditor::ShutdownModule()

@@ -3,10 +3,10 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 #include "Factories/Factory.h"
-#include "StaticMeshRuntimeDescriptorsFactory.generated.h"
+#include "StaticMeshRuntimeDescriptorFactory.generated.h"
 
 UCLASS(hidecategories=Object, MinimalAPI)
-class UStaticMeshRuntimeDescriptorsFactory : public UFactory
+class UStaticMeshRuntimeDescriptorFactory : public UFactory
 {
 	GENERATED_BODY()
 
@@ -14,7 +14,7 @@ public:
 	UPROPERTY(Transient)
 	UStaticMesh* OriginalMesh;
 	
-	UStaticMeshRuntimeDescriptorsFactory();
+	UStaticMeshRuntimeDescriptorFactory();
 
 	//~ Begin UFactory Interface
 	virtual bool ConfigureProperties() override;
