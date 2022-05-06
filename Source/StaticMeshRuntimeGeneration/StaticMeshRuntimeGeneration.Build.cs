@@ -36,7 +36,8 @@ public class StaticMeshRuntimeGeneration : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
-				"MeshDescription"
+				"MeshDescription",
+				"StaticMeshDescription"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -4,6 +4,7 @@
 #include "StaticMeshRuntimeDescriptor.h"
 
 #include "MeshAttributes.h"
+#include "StaticMeshOperations.h"
 
 void UStaticMeshRuntimeDescriptor::Serialize(FArchive& Ar)
 {
@@ -28,6 +29,8 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 		DescriptionPtrs.Reserve(Descriptions.Num());
 		for (int i = 0; i < Descriptions.Num(); ++i)
 		{
+			//TODO: Need to transform normals and tangents somehow but this is crashing for some reason
+			//FStaticMeshOperations::ComputeTangentsAndNormals(Descriptions[i], EComputeNTBsFlags::Normals | EComputeNTBsFlags::Tangents | EComputeNTBsFlags::UseMikkTSpace | EComputeNTBsFlags::WeightedNTBs);
 			DescriptionPtrs.Add(&Descriptions[i]);
 		}
 
