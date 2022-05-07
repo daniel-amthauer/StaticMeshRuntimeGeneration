@@ -4,6 +4,7 @@
 #include "StaticMeshRuntimeDescriptor.h"
 
 #include "MeshAttributes.h"
+#include "StaticMeshAttributes.h"
 #include "StaticMeshOperations.h"
 
 void UStaticMeshRuntimeDescriptor::Serialize(FArchive& Ar)
@@ -21,7 +22,31 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 		for (auto& Desc : Descriptions)
 		{
 			auto VertexPositions = Desc.GetVertexPositions().GetRawArray(0);
+			//To preserve original normals under the given transformation, 
+			//we create a temporary array of positions for the original vertex positions projected along their normal
+			FStaticMeshAttributes Attributes(Desc);
+			auto Normals = Attributes.GetVertexInstanceNormals().GetRawArray();
+			TArray<FVector3f> TempNormalRefs;
+			TempNormalRefs.Reserve(Normals.Num());
+			auto VertexInstanceVertexIndices = Attributes.GetVertexInstanceVertexIndices().GetRawArray();
+			check(Normals.Num() == VertexInstanceVertexIndices.Num());
+			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
+			{
+				TempNormalRefs.Add(VertexPositions[VertexInstanceVertexIndices[vi]] + Normals[vi]);
+			}
+			//Now apply transform to these temp normal reference points
+			VertexTransform(TempNormalRefs);
+
+			//Now transform the vertex positions
 			VertexTransform(VertexPositions);
+
+			//After original verts have already been transformed, recompute normals using transformed normal ref points and
+			//transformed vertex positions
+			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
+			{
+				Normals[vi] = (TempNormalRefs[vi] - VertexPositions[VertexInstanceVertexIndices[vi]]).GetSafeNormal(); 
+			}
+			//TODO: also transform tangents
 		}
 
 		//Create an array of pointers to the descriptions, which is the required input for BuildFromMeshDescriptions
@@ -29,8 +54,6 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 		DescriptionPtrs.Reserve(Descriptions.Num());
 		for (int i = 0; i < Descriptions.Num(); ++i)
 		{
-			//TODO: Need to transform normals and tangents somehow but this is crashing for some reason
-			//FStaticMeshOperations::ComputeTangentsAndNormals(Descriptions[i], EComputeNTBsFlags::Normals | EComputeNTBsFlags::Tangents | EComputeNTBsFlags::UseMikkTSpace | EComputeNTBsFlags::WeightedNTBs);
 			DescriptionPtrs.Add(&Descriptions[i]);
 		}
 
