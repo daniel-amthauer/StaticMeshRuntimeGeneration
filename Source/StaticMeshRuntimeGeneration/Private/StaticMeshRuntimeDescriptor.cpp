@@ -46,7 +46,7 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 			{
 				Normals[vi] = (TempNormalRefs[vi] - VertexPositions[VertexInstanceVertexIndices[vi]]).GetSafeNormal(); 
 			}
-			//TODO: also transform tangents
+			FStaticMeshOperations::ComputeMikktTangents(Desc, true);
 		}
 
 		//Create an array of pointers to the descriptions, which is the required input for BuildFromMeshDescriptions
