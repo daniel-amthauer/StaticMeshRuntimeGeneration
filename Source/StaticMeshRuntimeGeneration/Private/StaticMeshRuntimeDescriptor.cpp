@@ -32,7 +32,7 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 			check(Normals.Num() == VertexInstanceVertexIndices.Num());
 			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
 			{
-				TempNormalRefs.Add(VertexPositions[VertexInstanceVertexIndices[vi]] + Normals[vi]);
+				TempNormalRefs.Add(VertexPositions[VertexInstanceVertexIndices[vi]] - Normals[vi]);
 			}
 			//Now apply transform to these temp normal reference points
 			VertexTransform(TempNormalRefs);
@@ -44,7 +44,7 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 			//transformed vertex positions
 			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
 			{
-				Normals[vi] = (TempNormalRefs[vi] - VertexPositions[VertexInstanceVertexIndices[vi]]).GetSafeNormal(); 
+				Normals[vi] = (VertexPositions[VertexInstanceVertexIndices[vi]] - TempNormalRefs[vi]).GetSafeNormal(); 
 			}
 			FStaticMeshOperations::ComputeMikktTangents(Desc, true);
 		}
