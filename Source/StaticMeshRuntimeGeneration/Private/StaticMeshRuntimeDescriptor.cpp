@@ -64,6 +64,8 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 		Params.bCommitMeshDescription = false;
 		if (StaticMesh->BuildFromMeshDescriptions(DescriptionPtrs, Params))
 		{
+			StaticMesh->GetBodySetup()->CreatePhysicsMeshes();
+			StaticMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 			//TODO: maybe cache the static materials in the asset as well, instead of requiring the original mesh for this
 			if (Descriptor->OriginalMesh)
 			{
