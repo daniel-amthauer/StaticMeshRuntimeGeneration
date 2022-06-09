@@ -106,6 +106,7 @@ void UStaticMeshRuntimeDescriptor::RefreshDescriptors()
 		{
 			MeshDescriptions.Add(*OriginalMesh->GetMeshDescription(i));
 		}
+		(void)MarkPackageDirty();
 	}	
 }
 #endif
