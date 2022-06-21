@@ -7,7 +7,8 @@ public class StaticMeshRuntimeGenerationEditor : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "UnrealEd"});
-		PrivateDependencyModuleNames.AddRange(new string[] { "InputCore", "Slate", "SlateCore", "EditorStyle", "StaticMeshRuntimeGeneration"});
+		PrivateDependencyModuleNames.AddRange(new string[]
+			{ "InputCore", "Slate", "SlateCore", "EditorStyle", "ToolMenus", "StaticMeshRuntimeGeneration" });
  
 		PublicIncludePaths.AddRange(new string[] {"StaticMeshRuntimeGenerationEditor/Public"});
 		PrivateIncludePaths.AddRange(new string[] {"StaticMeshRuntimeGenerationEditor/Private"});

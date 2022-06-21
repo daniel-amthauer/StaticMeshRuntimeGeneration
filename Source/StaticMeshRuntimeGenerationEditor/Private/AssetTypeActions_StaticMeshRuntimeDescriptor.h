@@ -15,6 +15,8 @@ public:
 	virtual UClass* GetSupportedClass() const override;
 	virtual uint32 GetCategories() override { return MyCategory; }
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;
+	virtual bool HasActions(const TArray<UObject*>& InObjects) const override;
+	virtual void GetActions(const TArray<UObject*>& InObjects, FToolMenuSection& Section) override;
 
 private:
 	EAssetTypeCategories::Type MyCategory;
