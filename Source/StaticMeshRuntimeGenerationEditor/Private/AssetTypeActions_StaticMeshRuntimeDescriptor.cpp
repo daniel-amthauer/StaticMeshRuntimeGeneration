@@ -26,7 +26,7 @@ bool FAssetTypeActions_StaticMeshRuntimeDescriptor::HasActions(const TArray<UObj
 void FAssetTypeActions_StaticMeshRuntimeDescriptor::GetActions(const TArray<UObject*>& InObjects,
 	FToolMenuSection& Section)
 {
-	const TArray<TWeakObjectPtr<UObject>> SMRDs = GetTypedWeakObjectPtrs<UObject>(InObjects);
+	const TArray<TWeakObjectPtr<UObject>> WeakObjects = GetTypedWeakObjectPtrs<UObject>(InObjects);
 
 	Section.AddMenuEntry(
 		"Refresh_Descriptors",
@@ -36,9 +36,9 @@ void FAssetTypeActions_StaticMeshRuntimeDescriptor::GetActions(const TArray<UObj
 		FUIAction(
 			FExecuteAction::CreateLambda([=]
 			{
-				for (auto& SMRDWeak : SMRDs)
+				for (auto& WeakObj : WeakObjects)
 				{
-					if (auto SMRD = Cast<UStaticMeshRuntimeDescriptor>(SMRDWeak.Get()))
+					if (auto SMRD = Cast<UStaticMeshRuntimeDescriptor>(WeakObj.Get()))
 					{
 						SMRD->RefreshDescriptors();
 					}
