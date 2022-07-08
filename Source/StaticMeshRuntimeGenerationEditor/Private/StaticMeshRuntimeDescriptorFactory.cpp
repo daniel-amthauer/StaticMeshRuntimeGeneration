@@ -137,17 +137,16 @@ private:
 		AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SStaticMeshRuntimeDescriptorsCreateDialog::OnStaticMeshSelected);
 		//AssetPickerConfig.OnShouldFilterAsset = FOnShouldFilterAsset::CreateSP(this, &SStaticMeshRuntimeDescriptorsCreateDialog::FilterSkeletonBasedOnParentClass);
 		AssetPickerConfig.bAllowNullSelection = false;
-		AssetPickerConfig.InitialAssetViewType = EAssetViewType::List;
+		AssetPickerConfig.InitialAssetViewType = EAssetViewType::Tile;
 		AssetPickerConfig.InitialAssetSelection = TargetStaticMesh;
 		AssetPickerConfig.HiddenColumnNames =
 		{
-			"DiskSize",
-			"AdditionalPreviewSkeletalMeshes",
-			"PreviewSkeletalMesh"
+			"DiskSize"
 		};
-		AssetPickerConfig.bShowPathInColumnView = false;
+		AssetPickerConfig.bShowPathInColumnView = true;
 		AssetPickerConfig.bShowTypeInColumnView = false;
 		AssetPickerConfig.bFocusSearchBoxWhenOpened = false;
+		AssetPickerConfig.bCanShowFolders = true;
 	
 		return SNew(SVerticalBox)
 			+SVerticalBox::Slot()
