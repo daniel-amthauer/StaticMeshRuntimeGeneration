@@ -18,12 +18,7 @@ FText FAssetTypeActions_StaticMeshRuntimeDescriptor::GetAssetDescription(const F
 
 bool FAssetTypeActions_StaticMeshRuntimeDescriptor::HasActions(const TArray<UObject*>& InObjects) const
 {
-	for (auto Object : InObjects)
-	{
-		if (!Object->IsA<UStaticMeshRuntimeDescriptor>())
-			return false;
-	}
-	return InObjects.Num() > 0;
+	return true;
 }
 
 void FAssetTypeActions_StaticMeshRuntimeDescriptor::GetActions(const TArray<UObject*>& InObjects,
@@ -59,7 +54,7 @@ void FAssetTypeActions_StaticMeshRuntimeDescriptor::GetActions(const TArray<UObj
 
 UThumbnailInfo* FAssetTypeActions_StaticMeshRuntimeDescriptor::GetThumbnailInfo(UObject* Asset) const
 {
-	auto* Mesh = CastChecked<UStaticMeshRuntimeDescriptor>(Asset)->OriginalMesh;
+	const auto* Mesh = CastChecked<UStaticMeshRuntimeDescriptor>(Asset)->OriginalMesh;
 	UThumbnailInfo* ThumbnailInfo = Mesh->ThumbnailInfo;
 	return ThumbnailInfo;
 }
