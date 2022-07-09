@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿// Copyright Daniel Amthauer. All Rights Reserved
+#pragma once
 #include "AssetTypeActions_Base.h"
 
 class FAssetTypeActions_StaticMeshRuntimeDescriptor : public FAssetTypeActions_Base
@@ -17,6 +18,7 @@ public:
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;
 	virtual bool HasActions(const TArray<UObject*>& InObjects) const override;
 	virtual void GetActions(const TArray<UObject*>& InObjects, FToolMenuSection& Section) override;
+	virtual UThumbnailInfo* GetThumbnailInfo(UObject* Asset) const override;
 
 private:
 	EAssetTypeCategories::Type MyCategory;

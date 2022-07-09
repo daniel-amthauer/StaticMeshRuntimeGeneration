@@ -1,7 +1,10 @@
-﻿#include "AssetTypeActions_StaticMeshRuntimeDescriptor.h"
+﻿// Copyright Daniel Amthauer. All Rights Reserved
+#include "AssetTypeActions_StaticMeshRuntimeDescriptor.h"
 
 #include "StaticMeshRuntimeDescriptor.h"
+#include "StaticMeshRuntimeGenerationEditor.h"
 #include "ToolMenuSection.h"
+#include "ThumbnailRendering/SceneThumbnailInfo.h"
 
 UClass* FAssetTypeActions_StaticMeshRuntimeDescriptor::GetSupportedClass() const
 {
@@ -46,4 +49,17 @@ void FAssetTypeActions_StaticMeshRuntimeDescriptor::GetActions(const TArray<UObj
 			}),
 			FCanExecuteAction())
 		);
+
+	FStaticMeshRuntimeGenerationEditor& Module = FStaticMeshRuntimeGenerationEditor::GetModule();
+	if (Module.GetExtraActionsDelegate().IsBound())
+	{
+		Module.GetExtraActionsDelegate().Broadcast(WeakObjects, Section);
+	}
+}
+
+UThumbnailInfo* FAssetTypeActions_StaticMeshRuntimeDescriptor::GetThumbnailInfo(UObject* Asset) const
+{
+	auto* Mesh = CastChecked<UStaticMeshRuntimeDescriptor>(Asset)->OriginalMesh;
+	UThumbnailInfo* ThumbnailInfo = Mesh->ThumbnailInfo;
+	return ThumbnailInfo;
 }

@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Daniel Amthauer. All Rights Reserved
 
 #pragma once
 

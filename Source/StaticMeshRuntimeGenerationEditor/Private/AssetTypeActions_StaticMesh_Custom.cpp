@@ -1,32 +1,15 @@
-﻿#include "AssetTypeActions_StaticMesh_Custom.h"
+﻿// Copyright Daniel Amthauer. All Rights Reserved
+#include "AssetTypeActions_StaticMesh_Custom.h"
 
 #include "PackageTools.h"
 #include "StaticMeshRuntimeDescriptorFactory.h"
 #include "Engine/StaticMesh.h"
 #include "ToolMenuSection.h"
 
-UClass* FAssetTypeActions_StaticMesh_Custom::GetSupportedClass() const
-{
-	return UStaticMesh::StaticClass();
-}
-
-FText FAssetTypeActions_StaticMesh_Custom::GetAssetDescription(const FAssetData& AssetData) const
-{
-	return EngineActions->GetAssetDescription(AssetData);
-}
-
-bool FAssetTypeActions_StaticMesh_Custom::HasActions(const TArray<UObject*>& InObjects) const
-{
-	return EngineActions->HasActions(InObjects);
-}
-
 void FAssetTypeActions_StaticMesh_Custom::GetActions(const TArray<UObject*>& InObjects,
 	FToolMenuSection& Section)
 {
-	if (EngineActions.IsValid())
-	{
-		EngineActions->GetActions(InObjects, Section);
-	}
+	FAssetTypeActions_Proxy::GetActions(InObjects, Section);
 	
 	const TArray<TWeakObjectPtr<UObject>> WeakObjects = GetTypedWeakObjectPtrs<UObject>(InObjects);
 

@@ -1,3 +1,4 @@
+// Copyright Daniel Amthauer. All Rights Reserved
 #pragma once
 
 #include "CoreMinimal.h"

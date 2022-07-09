@@ -1,3 +1,4 @@
+// Copyright Daniel Amthauer. All Rights Reserved
 using UnrealBuildTool;
  
 public class StaticMeshRuntimeGenerationEditor : ModuleRules

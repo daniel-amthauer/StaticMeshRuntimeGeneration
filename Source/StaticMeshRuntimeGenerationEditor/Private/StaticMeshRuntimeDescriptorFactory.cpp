@@ -1,3 +1,4 @@
+// Copyright Daniel Amthauer. All Rights Reserved
 #include "StaticMeshRuntimeDescriptorFactory.h"
 
 #include "ContentBrowserDelegates.h"
@@ -57,7 +58,7 @@ public:
 								+SVerticalBox::Slot()
 								.FillHeight(1.0f)
 								[
-									MakeSkeletonPickerArea()
+									MakeStaticMeshPickerArea()
 								]
 							]
 						]
@@ -101,10 +102,10 @@ public:
 		];
 	}
 	
-	/** Sets properties for the supplied AnimBlueprintFactory */
-	bool ConfigureProperties(TWeakObjectPtr<UStaticMeshRuntimeDescriptorFactory> InAnimBlueprintFactory)
+	/** Sets properties for the supplied Factory */
+	bool ConfigureProperties(TWeakObjectPtr<UStaticMeshRuntimeDescriptorFactory> InSMRDFactory)
 	{
-		StaticMeshRuntimeDescriptorsFactory = InAnimBlueprintFactory;
+		StaticMeshRuntimeDescriptorsFactory = InSMRDFactory;
 
 		TSharedRef<SWindow> Window = SNew(SWindow)
 		.Title( INVTEXT("Create Static Mesh Runtime Descriptors") )
@@ -126,8 +127,8 @@ public:
 
 private:
 	
-	/** Creates the widgets for the target skeleton area */
-	TSharedRef<SWidget> MakeSkeletonPickerArea()
+	/** Creates the widgets for the target Static Mesh area */
+	TSharedRef<SWidget> MakeStaticMeshPickerArea()
 	{
 		const FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
 
@@ -135,7 +136,6 @@ private:
 		AssetPickerConfig.RefreshAssetViewDelegates.Add(&RefreshStaticMeshViewDelegate);
 		AssetPickerConfig.Filter.ClassNames.Add(UStaticMesh::StaticClass()->GetFName());
 		AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SStaticMeshRuntimeDescriptorsCreateDialog::OnStaticMeshSelected);
-		//AssetPickerConfig.OnShouldFilterAsset = FOnShouldFilterAsset::CreateSP(this, &SStaticMeshRuntimeDescriptorsCreateDialog::FilterSkeletonBasedOnParentClass);
 		AssetPickerConfig.bAllowNullSelection = false;
 		AssetPickerConfig.InitialAssetViewType = EAssetViewType::Tile;
 		AssetPickerConfig.InitialAssetSelection = TargetStaticMesh;
@@ -157,7 +157,7 @@ private:
 			];
 	}
 
-	/** Handler for when a skeleton is selected */
+	/** Handler for when a mesh is selected */
 	void OnStaticMeshSelected(const FAssetData& AssetData)
 	{
 		TargetStaticMesh = AssetData;
@@ -206,16 +206,16 @@ private:
 	/** The factory for which we are setting up properties */
 	TWeakObjectPtr<UStaticMeshRuntimeDescriptorFactory> StaticMeshRuntimeDescriptorsFactory;
 
-	/** The container for the target skeleton picker*/
+	/** The container for the target mesh picker*/
 	TSharedPtr<SVerticalBox> StaticMeshContainer;
 
 	/** A pointer to the window that is asking the user to select static mesh */
 	TWeakPtr<SWindow> PickerWindow;
 
-	/** The selected skeleton */
+	/** The selected mesh */
 	FAssetData TargetStaticMesh;
 
-	/** Delegate called to refresh the skeleton view */
+	/** Delegate called to refresh the mesh view */
 	FRefreshAssetViewDelegate RefreshStaticMeshViewDelegate;
 	
 	/** True if Ok was clicked */
