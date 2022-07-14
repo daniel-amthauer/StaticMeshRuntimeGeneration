@@ -1,13 +1,15 @@
 ﻿// Copyright Daniel Amthauer. All Rights Reserved
 #pragma once
-#include "AssetTypeActions_Base.h"
 
-class FAssetTypeActions_Proxy : public FAssetTypeActions_Base
+#include "Runtime/Launch/Resources/Version.h"
+
+#include "IAssetTypeActions.h"
+
+class FAssetTypeActions_Proxy : public IAssetTypeActions
 {
 public:
-	FAssetTypeActions_Proxy(TSharedPtr<IAssetTypeActions> InBaseActions)
-		: FAssetTypeActions_Base()
-		, BaseActions(InBaseActions)
+	FAssetTypeActions_Proxy(TSharedPtr<IAssetTypeActions> const& InBaseActions)
+		: BaseActions(InBaseActions)
 	{}
 	
 	// IAssetTypeActions Implementation
@@ -63,6 +65,7 @@ public:
 		return BaseActions->GetValidAssetsForPreviewOrEdit(InAssetDatas, bIsPreview);
 	}
 
+#if ENGINE_MAJOR_VERSION > 4
 	virtual bool CanRename(const FAssetData& InAsset, FText* OutErrorMsg) const override
 	{
 		return BaseActions->CanRename(InAsset, OutErrorMsg);
@@ -72,6 +75,7 @@ public:
 	{
 		return BaseActions->CanDuplicate(InAsset, OutErrorMsg);
 	}
+#endif
 
 	virtual bool CanFilter() override
 	{
@@ -153,9 +157,28 @@ public:
 		return BaseActions->GetDisplayNameFromAssetData(AssetData);
 	}
 
+#if ENGINE_MAJOR_VERSION > 4
 	virtual FName GetFilterName() const override
 	{
 		return BaseActions->GetFilterName();
+	}
+#else
+	virtual void AssetsActivated(const TArray<UObject*>& InObjects, EAssetTypeActivationMethod::Type ActivationType) override
+	{
+		return BaseActions->AssetsActivated(InObjects, ActivationType);
+	}
+#endif
+	virtual FText GetAssetDescription(const FAssetData& AssetData) const override
+	{
+		return BaseActions->GetAssetDescription(AssetData);
+	}
+	virtual void SetSupported(bool bInSupported) override
+	{
+		BaseActions->SetSupported(bInSupported);
+	}
+	virtual bool IsSupported() const override
+	{
+		return BaseActions->IsSupported();
 	}
 
 private:

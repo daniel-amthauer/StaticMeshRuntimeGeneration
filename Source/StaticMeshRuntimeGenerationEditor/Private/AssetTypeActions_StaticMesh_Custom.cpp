@@ -1,6 +1,7 @@
 ﻿// Copyright Daniel Amthauer. All Rights Reserved
 #include "AssetTypeActions_StaticMesh_Custom.h"
 
+#include "ObjectEditorUtils.h"
 #include "PackageTools.h"
 #include "StaticMeshRuntimeDescriptorFactory.h"
 #include "Engine/StaticMesh.h"
@@ -11,7 +12,7 @@ void FAssetTypeActions_StaticMesh_Custom::GetActions(const TArray<UObject*>& InO
 {
 	FAssetTypeActions_Proxy::GetActions(InObjects, Section);
 	
-	const TArray<TWeakObjectPtr<UObject>> WeakObjects = GetTypedWeakObjectPtrs<UObject>(InObjects);
+	const TArray<TWeakObjectPtr<UObject>> WeakObjects = FObjectEditorUtils::GetTypedWeakObjectPtrs<UObject>(InObjects);
 
 	Section.AddMenuEntry(
 		"Create Static Mesh Runtime Descriptors",
@@ -34,7 +35,7 @@ void FAssetTypeActions_StaticMesh_Custom::GetActions(const TArray<UObject*>& InO
 						const FString BaseAssetNameWithPrefix = TEXT("SMRD_") + FPackageName::GetLongPackageAssetName(SanitizedBasePackageName);
 						FString Name;
 						FString PackageName;
-						CreateUniqueAssetName(PackagePath / BaseAssetNameWithPrefix, TEXT(""), PackageName, Name);
+						AssetToolsModule.Get().CreateUniqueAssetName(PackagePath / BaseAssetNameWithPrefix, TEXT(""), PackageName, Name);
 						SMRDFactory->OriginalMesh = StaticMesh;
 						UObject* NewAsset = AssetToolsModule.Get().CreateAsset(Name, PackagePath, SMRDFactory->GetSupportedClass(), SMRDFactory);
 						ObjectsToSync.Add(NewAsset);
