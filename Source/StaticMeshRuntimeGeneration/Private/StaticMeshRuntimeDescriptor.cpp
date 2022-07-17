@@ -13,7 +13,55 @@ void UStaticMeshRuntimeDescriptor::Serialize(FArchive& Ar)
 	Ar << MeshDescriptions;
 }
 
-UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor(UStaticMeshRuntimeDescriptor* Descriptor, TFunction<void(TArrayView<FVector3f>)> VertexTransform)
+UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor(const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform)
+{
+	if (Descriptor)
+	{
+		//Copy the mesh descriptions and apply transformation to vertex positions
+		const TArray<FMeshDescription> Descriptions = CreateTransformedMeshDescriptors(Descriptor, VertexTransform);
+
+		const auto StaticMesh = CreateRuntimeStaticMeshFromDescriptions(Descriptions);
+		if (StaticMesh && Descriptor->OriginalMesh)
+		{
+			StaticMesh->SetStaticMaterials(Descriptor->OriginalMesh->GetStaticMaterials());
+		}
+		return StaticMesh;
+	}
+	return nullptr;
+}
+
+UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptions(
+	TArray<FMeshDescription> const& Descriptions)
+{
+	//Create an array of pointers to the descriptions, which is the required input for BuildFromMeshDescriptions
+	TArray<const FMeshDescription*> DescriptionPtrs;
+	DescriptionPtrs.Reserve(Descriptions.Num());
+	for (int i = 0; i < Descriptions.Num(); ++i)
+	{
+		DescriptionPtrs.Add(&Descriptions[i]);
+	}
+
+	//Create a new transient static mesh from the modified descriptions
+	auto* StaticMesh = NewObject<UStaticMesh>(GetTransientPackage(), NAME_None, RF_Transient);
+	UStaticMesh::FBuildMeshDescriptionsParams Params;
+	Params.bFastBuild = true;
+	Params.bCommitMeshDescription = false;
+	bool bValid;
+	{
+		QUICK_SCOPE_CYCLE_COUNTER(BuildFromMeshDescriptions);
+		bValid = StaticMesh->BuildFromMeshDescriptions(DescriptionPtrs, Params);
+	}
+	if (bValid)
+	{
+		StaticMesh->GetBodySetup()->CreatePhysicsMeshes();
+		StaticMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
+		return StaticMesh;
+	}
+	return nullptr;
+}
+
+TArray<FMeshDescription> UStaticMeshRuntimeDescriptor::CreateTransformedMeshDescriptors(
+	const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform)
 {
 	if (Descriptor)
 	{
@@ -48,52 +96,9 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor
 			}
 			FStaticMeshOperations::ComputeMikktTangents(Desc, true);
 		}
-
-		//Create an array of pointers to the descriptions, which is the required input for BuildFromMeshDescriptions
-		TArray<const FMeshDescription*> DescriptionPtrs;
-		DescriptionPtrs.Reserve(Descriptions.Num());
-		for (int i = 0; i < Descriptions.Num(); ++i)
-		{
-			DescriptionPtrs.Add(&Descriptions[i]);
-		}
-
-		//Create a new transient static mesh from the modified descriptions
-		auto* StaticMesh = NewObject<UStaticMesh>(GetTransientPackage(), NAME_None, RF_Transient);
-		UStaticMesh::FBuildMeshDescriptionsParams Params;
-		Params.bFastBuild = true;
-		Params.bCommitMeshDescription = false;
-		if (StaticMesh->BuildFromMeshDescriptions(DescriptionPtrs, Params))
-		{
-			StaticMesh->GetBodySetup()->CreatePhysicsMeshes();
-			StaticMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
-			//TODO: maybe cache the static materials in the asset as well, instead of requiring the original mesh for this
-			if (Descriptor->OriginalMesh)
-			{
-				StaticMesh->SetStaticMaterials(Descriptor->OriginalMesh->GetStaticMaterials());
-			}
-			return StaticMesh;
-		}
+		return Descriptions;
 	}
-	return nullptr;
-}
-UStaticMesh* UStaticMeshRuntimeDescriptor::K2_CreateRuntimeStaticMeshFromDescriptor(
-	UStaticMeshRuntimeDescriptor* Descriptor, FBP_VertexTransform VertexTransform)
-{
-	return CreateRuntimeStaticMeshFromDescriptor(Descriptor, [=](TArrayView<FVector3f> OriginalVerts)
-	{
-		TArray<FVector> BP_Verts;
-		BP_Verts.Reserve(OriginalVerts.Num());
-		for (auto& Vert : OriginalVerts)
-		{
-			BP_Verts.Add(FVector(Vert));
-		}
-		BP_Verts = VertexTransform.Execute(BP_Verts);
-		const int NumVertsToModify = FMath::Min(BP_Verts.Num(), OriginalVerts.Num());
-		for (int v = 0; v < NumVertsToModify; ++v)
-		{
-			OriginalVerts[v] = FVector3f(BP_Verts[v]);
-		}
-	});
+	return TArray<FMeshDescription>();
 }
 
 #if WITH_EDITOR

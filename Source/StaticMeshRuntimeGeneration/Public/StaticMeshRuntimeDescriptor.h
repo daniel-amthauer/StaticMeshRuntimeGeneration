@@ -28,11 +28,20 @@ public:
 	 * @param Descriptor The asset containing the cached mesh descriptions
 	 * @param VertexTransform A function that can read and transform the vertex positions of the mesh description. Called once for each mesh description (one for each LOD index)
 	 */
-	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptor(UStaticMeshRuntimeDescriptor* Descriptor, TFunction<void(TArrayView<FVector3f>)> VertexTransform);
+	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptor(const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform);
 
-	DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(TArray<FVector>, FBP_VertexTransform, const TArray<FVector>&, VertexPositions);
-	UFUNCTION(BlueprintCallable, meta=(DisplayName = "Create Runtime Static Mesh From Descriptor"))
-	static UStaticMesh* K2_CreateRuntimeStaticMeshFromDescriptor(UStaticMeshRuntimeDescriptor* Descriptor, FBP_VertexTransform VertexTransform);
+	/**
+	 * Creates a static mesh at runtime based on an array of mesh descriptions
+	 * @param Descriptions Array containing descriptions for each LOD
+	 */
+	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptions(TArray<FMeshDescription> const& Descriptions);
+
+	/**
+	 * Creates a transformed copy at runtime based on the descriptors stored in a cached asset
+	 * @param Descriptor The asset containing the cached mesh descriptions
+	 * @param VertexTransform A function that can read and transform the vertex positions of the mesh description. Called once for each mesh description (one for each LOD index)
+	 */
+	static TArray<FMeshDescription> CreateTransformedMeshDescriptors(const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform);
 
 #if WITH_EDITOR
 	UFUNCTION(CallInEditor)
