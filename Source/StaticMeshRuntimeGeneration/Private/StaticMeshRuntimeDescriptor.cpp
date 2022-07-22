@@ -112,6 +112,14 @@ void UStaticMeshRuntimeDescriptor::RefreshDescriptors()
 		for (int i = 0; i < OriginalMesh->GetNumSourceModels(); ++i)
 		{
 			MeshDescriptions.Add(*OriginalMesh->GetMeshDescription(i));
+			//patch up imported material names using mesh section map for original mesh
+			auto MaterialSlotNames = MeshDescriptions.Last().PolygonGroupAttributes().GetAttributesRef<FName>(
+				MeshAttribute::PolygonGroup::ImportedMaterialSlotName);
+			auto& SectionInfo = OriginalMesh->GetSectionInfoMap();
+			for (int s = 0; s < SectionInfo.GetSectionNumber(i); ++s)
+			{
+				MaterialSlotNames[s] = OriginalMesh->GetStaticMaterials()[SectionInfo.Get(i,s).MaterialIndex].MaterialSlotName;
+			}
 		}
 		(void)MarkPackageDirty();
 	}	
