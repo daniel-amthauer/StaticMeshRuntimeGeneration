@@ -5,7 +5,14 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "MeshDescription.h"
+
+#include "Runtime/Launch/Resources/Version.h"
+
 #include "StaticMeshRuntimeDescriptor.generated.h"
+
+#if ENGINE_MAJOR_VERSION < 5
+typedef FVector FVector3f;
+#endif
 
 /**
  * An asset that can cache editor-only data for a static mesh so that it can be used at runtime. This can be used to generate a static mesh at runtime based on another static mesh

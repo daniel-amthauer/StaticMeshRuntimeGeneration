@@ -7,6 +7,27 @@
 #include "StaticMeshAttributes.h"
 #include "StaticMeshOperations.h"
 
+
+#if ENGINE_MAJOR_VERSION < 5
+template <typename ElementIDType, typename AttributeType>
+class TMeshAttributesRef_AccessHack : public TMeshAttributesRef<ElementIDType, AttributeType>
+{
+public:
+	auto GetRawArray(int Index = 0)
+	{
+		auto ConstData = this->ArrayPtr->GetArrayForIndex(Index).GetData();
+		auto Data = const_cast<AttributeType*>(ConstData);
+		return MakeArrayView(Data, this->ArrayPtr->GetArrayForIndex(Index).Num());
+	}
+};
+template <typename ElementIDType, typename AttributeType>
+TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>& MakeAccessHack(TMeshAttributesRef<ElementIDType, AttributeType>&& Attributes)
+{
+	return static_cast<TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>&>(Attributes);
+}
+#endif
+
+
 void UStaticMeshRuntimeDescriptor::Serialize(FArchive& Ar)
 {
 	UObject::Serialize(Ar);
@@ -44,7 +65,9 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptio
 	//Create a new transient static mesh from the modified descriptions
 	auto* StaticMesh = NewObject<UStaticMesh>(GetTransientPackage(), NAME_None, RF_Transient);
 	UStaticMesh::FBuildMeshDescriptionsParams Params;
+#if ENGINE_MAJOR_VERSION >= 5
 	Params.bFastBuild = true;
+#endif
 	Params.bCommitMeshDescription = false;
 	bool bValid;
 	{
@@ -69,31 +92,58 @@ TArray<FMeshDescription> UStaticMeshRuntimeDescriptor::CreateTransformedMeshDesc
 		TArray<FMeshDescription> Descriptions = Descriptor->MeshDescriptions;
 		for (auto& Desc : Descriptions)
 		{
+			FStaticMeshAttributes Attributes(Desc);
+#if ENGINE_MAJOR_VERSION >= 5
 			auto VertexPositions = Desc.GetVertexPositions().GetRawArray(0);
+#else
+			auto VertexPositions_Hack = MakeAccessHack(Attributes.GetVertexPositions()).GetRawArray(0);
+			TArrayView<FVector3f>& VertexPositions = reinterpret_cast<TArrayView<FVector3f>&>(VertexPositions_Hack);
+#endif
 			//To preserve original normals under the given transformation, 
 			//we create a temporary array of positions for the original vertex positions projected along their normal
-			FStaticMeshAttributes Attributes(Desc);
+
+#if ENGINE_MAJOR_VERSION >= 5
 			auto Normals = Attributes.GetVertexInstanceNormals().GetRawArray();
+#else
+			auto Normals = MakeAccessHack(Attributes.GetVertexInstanceNormals()).GetRawArray();
+#endif
 			TArray<FVector3f> TempNormalRefs;
 			TempNormalRefs.Reserve(Normals.Num());
+#if ENGINE_MAJOR_VERSION >= 5
 			auto VertexInstanceVertexIndices = Attributes.GetVertexInstanceVertexIndices().GetRawArray();
 			check(Normals.Num() == VertexInstanceVertexIndices.Num());
 			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
 			{
 				TempNormalRefs.Add(VertexPositions[VertexInstanceVertexIndices[vi]] - Normals[vi]);
 			}
+#else
+			for (const FVertexInstanceID VertexInstanceID : Desc.VertexInstances().GetElementIDs())
+			{
+				const FVertexID VertexID = Desc.GetVertexInstanceVertex(VertexInstanceID);
+				TempNormalRefs.Add(VertexPositions[VertexID.GetValue()] - Normals[VertexInstanceID.GetValue()]);
+			}
+#endif
 			//Now apply transform to these temp normal reference points
 			VertexTransform(TempNormalRefs);
+
 
 			//Now transform the vertex positions
 			VertexTransform(VertexPositions);
 
 			//After original verts have already been transformed, recompute normals using transformed normal ref points and
 			//transformed vertex positions
+#if ENGINE_MAJOR_VERSION >= 5
 			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
 			{
 				Normals[vi] = (VertexPositions[VertexInstanceVertexIndices[vi]] - TempNormalRefs[vi]).GetSafeNormal(); 
 			}
+#else
+			for (const FVertexInstanceID VertexInstanceID : Desc.VertexInstances().GetElementIDs())
+			{
+				const FVertexID VertexID = Desc.GetVertexInstanceVertex(VertexInstanceID);
+				Normals[VertexInstanceID.GetValue()] = (VertexPositions[VertexID.GetValue()] - TempNormalRefs[VertexInstanceID.GetValue()]).GetSafeNormal();
+			}
+#endif
 			FStaticMeshOperations::ComputeMikktTangents(Desc, true);
 		}
 		return Descriptions;
