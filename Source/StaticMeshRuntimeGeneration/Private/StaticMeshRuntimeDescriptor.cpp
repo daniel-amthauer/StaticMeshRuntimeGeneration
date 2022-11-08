@@ -25,6 +25,12 @@ TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>& MakeAccessHack(TMes
 {
 	return static_cast<TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>&>(Attributes);
 }
+
+template <typename ElementIDType, typename AttributeType>
+TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>& MakeAccessHack(TMeshAttributesRef<ElementIDType, AttributeType>& Attributes)
+{
+	return static_cast<TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>&>(Attributes);
+}
 #endif
 
 
@@ -168,7 +174,12 @@ void UStaticMeshRuntimeDescriptor::RefreshDescriptors()
 			auto& SectionInfo = OriginalMesh->GetSectionInfoMap();
 			for (int s = 0; s < SectionInfo.GetSectionNumber(i); ++s)
 			{
-				MaterialSlotNames[s] = OriginalMesh->GetStaticMaterials()[SectionInfo.Get(i,s).MaterialIndex].MaterialSlotName;
+#if ENGINE_MAJOR_VERSION < 5
+				MakeAccessHack(MaterialSlotNames).GetRawArray()[s]
+#else
+				MaterialSlotNames[s]
+#endif
+				= OriginalMesh->GetStaticMaterials()[SectionInfo.Get(i,s).MaterialIndex].MaterialSlotName;
 			}
 		}
 		(void)MarkPackageDirty();
