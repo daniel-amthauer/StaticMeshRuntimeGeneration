@@ -5,7 +5,14 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "MeshDescription.h"
+
+#include "Runtime/Launch/Resources/Version.h"
+
 #include "StaticMeshRuntimeDescriptor.generated.h"
+
+#if ENGINE_MAJOR_VERSION < 5
+typedef FVector FVector3f;
+#endif
 
 /**
  * An asset that can cache editor-only data for a static mesh so that it can be used at runtime. This can be used to generate a static mesh at runtime based on another static mesh
@@ -28,13 +35,14 @@ public:
 	 * @param Descriptor The asset containing the cached mesh descriptions
 	 * @param VertexTransform A function that can read and transform the vertex positions of the mesh description. Called once for each mesh description (one for each LOD index)
 	 */
-	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptor(const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform);
+	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptor(const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform, UObject*
+	                                                          Outer = GetTransientPackage());
 
 	/**
 	 * Creates a static mesh at runtime based on an array of mesh descriptions
 	 * @param Descriptions Array containing descriptions for each LOD
 	 */
-	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptions(TArray<FMeshDescription> const& Descriptions);
+	static UStaticMesh* CreateRuntimeStaticMeshFromDescriptions(TArray<FMeshDescription> const& Descriptions, TArray<FStaticMaterial> const& StaticMaterials, UObject* Outer = GetTransientPackage());
 
 	/**
 	 * Creates a transformed copy at runtime based on the descriptors stored in a cached asset
