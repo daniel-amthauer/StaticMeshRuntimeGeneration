@@ -181,6 +181,13 @@ public:
 		return BaseActions->IsSupported();
 	}
 
+#if ENGINE_MAJOR_VERSION > 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION > 0)
+	virtual FTopLevelAssetPath GetClassPathName() const override
+	{
+		return BaseActions->GetClassPathName();
+	}
+#endif
+
 private:
 	TSharedPtr<IAssetTypeActions> BaseActions;
 };

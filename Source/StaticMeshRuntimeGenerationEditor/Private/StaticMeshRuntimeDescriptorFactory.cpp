@@ -3,6 +3,7 @@
 
 #include "ContentBrowserDelegates.h"
 #include "ContentBrowserModule.h"
+#include "EditorStyleSet.h"
 #include "IContentBrowserSingleton.h"
 #include "StaticMeshRuntimeDescriptor.h"
 #include "Widgets/Layout/SUniformGridPanel.h"
