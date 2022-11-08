@@ -34,25 +34,23 @@ void UStaticMeshRuntimeDescriptor::Serialize(FArchive& Ar)
 	Ar << MeshDescriptions;
 }
 
-UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor(const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform)
+UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor(
+	const UStaticMeshRuntimeDescriptor* Descriptor, TFunctionRef<void(TArrayView<FVector3f>)> VertexTransform,
+	UObject* Outer)
 {
 	if (Descriptor)
 	{
 		//Copy the mesh descriptions and apply transformation to vertex positions
 		const TArray<FMeshDescription> Descriptions = CreateTransformedMeshDescriptors(Descriptor, VertexTransform);
-
-		const auto StaticMesh = CreateRuntimeStaticMeshFromDescriptions(Descriptions);
-		if (StaticMesh && Descriptor->OriginalMesh)
-		{
-			StaticMesh->SetStaticMaterials(Descriptor->OriginalMesh->GetStaticMaterials());
-		}
+		TArray<FStaticMaterial> Empty;
+		const auto StaticMesh = CreateRuntimeStaticMeshFromDescriptions(Descriptions, Descriptor->OriginalMesh ? Descriptor->OriginalMesh->GetStaticMaterials() : Empty, Outer);
 		return StaticMesh;
 	}
 	return nullptr;
 }
 
 UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptions(
-	TArray<FMeshDescription> const& Descriptions)
+	TArray<FMeshDescription> const& Descriptions, TArray<FStaticMaterial> const& StaticMaterials, UObject* Outer)
 {
 	//Create an array of pointers to the descriptions, which is the required input for BuildFromMeshDescriptions
 	TArray<const FMeshDescription*> DescriptionPtrs;
@@ -63,12 +61,15 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptio
 	}
 
 	//Create a new transient static mesh from the modified descriptions
-	auto* StaticMesh = NewObject<UStaticMesh>(GetTransientPackage(), NAME_None, RF_Transient);
+	auto* StaticMesh = NewObject<UStaticMesh>(Outer, NAME_None, RF_Transient);
 	UStaticMesh::FBuildMeshDescriptionsParams Params;
 #if ENGINE_MAJOR_VERSION >= 5
 	Params.bFastBuild = true;
 #endif
 	Params.bCommitMeshDescription = false;
+	Params.bAllowCpuAccess = true;
+	StaticMesh->bAllowCPUAccess = true;
+	StaticMesh->SetStaticMaterials(StaticMaterials);
 	bool bValid;
 	{
 		QUICK_SCOPE_CYCLE_COUNTER(BuildFromMeshDescriptions);
@@ -76,8 +77,9 @@ UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptio
 	}
 	if (bValid)
 	{
-		StaticMesh->GetBodySetup()->CreatePhysicsMeshes();
+		
 		StaticMesh->GetBodySetup()->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
+		StaticMesh->GetBodySetup()->CreatePhysicsMeshes();
 		return StaticMesh;
 	}
 	return nullptr;
@@ -160,6 +162,14 @@ void UStaticMeshRuntimeDescriptor::RefreshDescriptors()
 		for (int i = 0; i < OriginalMesh->GetNumSourceModels(); ++i)
 		{
 			MeshDescriptions.Add(*OriginalMesh->GetMeshDescription(i));
+			//patch up imported material names using mesh section map for original mesh
+			auto MaterialSlotNames = MeshDescriptions.Last().PolygonGroupAttributes().GetAttributesRef<FName>(
+				MeshAttribute::PolygonGroup::ImportedMaterialSlotName);
+			auto& SectionInfo = OriginalMesh->GetSectionInfoMap();
+			for (int s = 0; s < SectionInfo.GetSectionNumber(i); ++s)
+			{
+				MaterialSlotNames[s] = OriginalMesh->GetStaticMaterials()[SectionInfo.Get(i,s).MaterialIndex].MaterialSlotName;
+			}
 		}
 		(void)MarkPackageDirty();
 	}	
