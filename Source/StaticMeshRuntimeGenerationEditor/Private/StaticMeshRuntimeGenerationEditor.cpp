@@ -3,10 +3,8 @@
 
 #include "AssetToolsModule.h"
 #include "AssetTypeActions_StaticMeshRuntimeDescriptor.h"
-#include "AssetTypeActions_StaticMesh_Custom.h"
 #include "StaticMeshRuntimeDescriptor.h"
 #include "StaticMeshRuntimeDescriptorThumbnailRenderer.h"
-#include "ThumbnailRendering/StaticMeshThumbnailRenderer.h"
 
 DEFINE_LOG_CATEGORY(StaticMeshRuntimeGenerationEditor);
 
@@ -17,9 +15,6 @@ void FStaticMeshRuntimeGenerationEditor::StartupModule()
 	// Register the editor asset type actions.
 	IAssetTools& AssetTools = FAssetToolsModule::GetModule().Get();
 	AssetTools.RegisterAssetTypeActions(MakeShared<FAssetTypeActions_StaticMeshRuntimeDescriptor>(EAssetTypeCategories::Misc));
-
-	TSharedPtr<IAssetTypeActions> EngineActions = AssetTools.GetAssetTypeActionsForClass(UStaticMesh::StaticClass()).Pin();
-	AssetTools.RegisterAssetTypeActions(MakeShared<FAssetTypeActions_StaticMesh_Custom>(EngineActions));
 
 	UThumbnailManager::Get().RegisterCustomRenderer(UStaticMeshRuntimeDescriptor::StaticClass(), UStaticMeshRuntimeDescriptorThumbnailRenderer::StaticClass());
 }

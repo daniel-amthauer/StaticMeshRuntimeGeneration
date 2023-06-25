@@ -5,13 +5,21 @@ public class StaticMeshRuntimeGenerationEditor : ModuleRules
 {
 	public StaticMeshRuntimeGenerationEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "UnrealEd"});
-		PrivateDependencyModuleNames.AddRange(new string[]
-			{ "InputCore", "Slate", "SlateCore", "EditorStyle", "ToolMenus", "StaticMeshRuntimeGeneration" });
+		PublicDependencyModuleNames.AddRange(new [] { "Core", "CoreUObject", "Engine", "UnrealEd"});
+		PrivateDependencyModuleNames.AddRange(new []
+		{
+			"InputCore",
+			"Slate",
+			"SlateCore",
+			"EditorStyle",
+			"ToolMenus",
+			"ContentBrowser",
+			"StaticMeshRuntimeGeneration"
+		});
  
-		PublicIncludePaths.AddRange(new string[] {"StaticMeshRuntimeGenerationEditor/Public"});
-		PrivateIncludePaths.AddRange(new string[] {"StaticMeshRuntimeGenerationEditor/Private"});
+		PublicIncludePaths.AddRange(new [] {"StaticMeshRuntimeGenerationEditor/Public"});
+		PrivateIncludePaths.AddRange(new [] {"StaticMeshRuntimeGenerationEditor/Private"});
 	}
 }

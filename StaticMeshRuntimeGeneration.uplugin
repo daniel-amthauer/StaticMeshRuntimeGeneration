@@ -22,9 +22,9 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"name": "StaticMeshRuntimeGenerationEditor",
-			"type": "Editor",
-			"loadingPhase": "PostEngineInit"
+			"Name": "StaticMeshRuntimeGenerationEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
 		}
 	]
 }

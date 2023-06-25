@@ -26,7 +26,7 @@ public:
 		[
 			SNew(SBorder)
 			.Visibility(EVisibility::Visible)
-			.BorderImage(FEditorStyle::GetBrush("ChildWindow.Background"))
+			.BorderImage(FAppStyle::GetBrush("ChildWindow.Background"))
 			[
 				SNew(SVerticalBox)
 				+SVerticalBox::Slot()
@@ -43,7 +43,7 @@ public:
 						.HeightOverride(400.0f)
 						[
 							SNew(SBorder)
-							.BorderImage(FEditorStyle::GetBrush("NewAnimBlueprintDialog.AreaBorder"))
+							.BorderImage(FAppStyle::GetBrush("NewAnimBlueprintDialog.AreaBorder"))
 							[	
 								SNew(SVerticalBox)
 								+SVerticalBox::Slot()
@@ -52,7 +52,7 @@ public:
 								[
 									SNew(STextBlock)
 									.Text(INVTEXT("Static Mesh"))
-									.TextStyle( FEditorStyle::Get(), "NormalText" )
+									.TextStyle( FAppStyle::Get(), "NormalText" )
 									.ToolTipText(INVTEXT("Choose the static mesh for which mesh descriptors will be cached, so you can generate a modified copy of it at runtime"))
 								]
 								+SVerticalBox::Slot()
@@ -73,9 +73,9 @@ public:
 				.Padding(10.0f)
 				[
 					SNew(SUniformGridPanel)
-					.SlotPadding(FEditorStyle::GetMargin("StandardDialog.SlotPadding"))
-					.MinDesiredSlotWidth(FEditorStyle::GetFloat("StandardDialog.MinDesiredSlotWidth"))
-					.MinDesiredSlotHeight(FEditorStyle::GetFloat("StandardDialog.MinDesiredSlotHeight"))
+					.SlotPadding(FAppStyle::GetMargin("StandardDialog.SlotPadding"))
+					.MinDesiredSlotWidth(FAppStyle::GetFloat("StandardDialog.MinDesiredSlotWidth"))
+					.MinDesiredSlotHeight(FAppStyle::GetFloat("StandardDialog.MinDesiredSlotHeight"))
 					+SUniformGridPanel::Slot(0,0)
 					[
 						SNew(SButton)
@@ -85,7 +85,7 @@ public:
 							return TargetStaticMesh.IsValid();
 						})
 						.HAlign(HAlign_Center)
-						.ContentPadding( FEditorStyle::GetMargin("StandardDialog.ContentPadding") )
+						.ContentPadding( FAppStyle::GetMargin("StandardDialog.ContentPadding") )
 						.OnClicked(this, &SStaticMeshRuntimeDescriptorsCreateDialog::OkClicked)
 						.Text(INVTEXT("Create"))
 					]
@@ -93,7 +93,7 @@ public:
 					[
 						SNew(SButton)
 						.HAlign(HAlign_Center)
-						.ContentPadding( FEditorStyle::GetMargin("StandardDialog.ContentPadding") )
+						.ContentPadding( FAppStyle::GetMargin("StandardDialog.ContentPadding") )
 						.OnClicked(this, &SStaticMeshRuntimeDescriptorsCreateDialog::CancelClicked)
 						.Text(INVTEXT("Cancel"))
 					]
@@ -134,7 +134,7 @@ private:
 
 		FAssetPickerConfig AssetPickerConfig;
 		AssetPickerConfig.RefreshAssetViewDelegates.Add(&RefreshStaticMeshViewDelegate);
-		AssetPickerConfig.Filter.ClassNames.Add(UStaticMesh::StaticClass()->GetFName());
+		AssetPickerConfig.Filter.ClassPaths.Add(UStaticMesh::StaticClass()->GetClassPathName());
 		AssetPickerConfig.OnAssetSelected = FOnAssetSelected::CreateSP(this, &SStaticMeshRuntimeDescriptorsCreateDialog::OnStaticMeshSelected);
 		AssetPickerConfig.bAllowNullSelection = false;
 		AssetPickerConfig.InitialAssetViewType = EAssetViewType::Tile;

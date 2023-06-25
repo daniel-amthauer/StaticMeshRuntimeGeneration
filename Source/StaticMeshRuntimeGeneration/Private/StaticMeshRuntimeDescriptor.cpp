@@ -6,6 +6,7 @@
 #include "MeshAttributes.h"
 #include "StaticMeshAttributes.h"
 #include "StaticMeshOperations.h"
+#include "PhysicsEngine/BodySetup.h"
 
 
 #if ENGINE_MAJOR_VERSION < 5
@@ -37,7 +38,16 @@ TMeshAttributesRef_AccessHack<ElementIDType, AttributeType>& MakeAccessHack(TMes
 void UStaticMeshRuntimeDescriptor::Serialize(FArchive& Ar)
 {
 	UObject::Serialize(Ar);
-	Ar << MeshDescriptions;
+#if	0//WITH_EDITOR
+	if (Ar.IsLoading())
+	{
+		RefreshDescriptors();
+	}
+	if (Ar.IsSaving())
+#endif
+	{
+		Ar << MeshDescriptions;
+	}
 }
 
 UStaticMesh* UStaticMeshRuntimeDescriptor::CreateRuntimeStaticMeshFromDescriptor(
@@ -101,57 +111,31 @@ TArray<FMeshDescription> UStaticMeshRuntimeDescriptor::CreateTransformedMeshDesc
 		for (auto& Desc : Descriptions)
 		{
 			FStaticMeshAttributes Attributes(Desc);
-#if ENGINE_MAJOR_VERSION >= 5
 			auto VertexPositions = Desc.GetVertexPositions().GetRawArray(0);
-#else
-			auto VertexPositions_Hack = MakeAccessHack(Attributes.GetVertexPositions()).GetRawArray(0);
-			TArrayView<FVector3f>& VertexPositions = reinterpret_cast<TArrayView<FVector3f>&>(VertexPositions_Hack);
-#endif
 			//To preserve original normals under the given transformation, 
 			//we create a temporary array of positions for the original vertex positions projected along their normal
 
-#if ENGINE_MAJOR_VERSION >= 5
 			auto Normals = Attributes.GetVertexInstanceNormals().GetRawArray();
-#else
-			auto Normals = MakeAccessHack(Attributes.GetVertexInstanceNormals()).GetRawArray();
-#endif
 			TArray<FVector3f> TempNormalRefs;
 			TempNormalRefs.Reserve(Normals.Num());
-#if ENGINE_MAJOR_VERSION >= 5
 			auto VertexInstanceVertexIndices = Attributes.GetVertexInstanceVertexIndices().GetRawArray();
 			check(Normals.Num() == VertexInstanceVertexIndices.Num());
 			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
 			{
 				TempNormalRefs.Add(VertexPositions[VertexInstanceVertexIndices[vi]] - Normals[vi]);
 			}
-#else
-			for (const FVertexInstanceID VertexInstanceID : Desc.VertexInstances().GetElementIDs())
-			{
-				const FVertexID VertexID = Desc.GetVertexInstanceVertex(VertexInstanceID);
-				TempNormalRefs.Add(VertexPositions[VertexID.GetValue()] - Normals[VertexInstanceID.GetValue()]);
-			}
-#endif
 			//Now apply transform to these temp normal reference points
 			VertexTransform(TempNormalRefs);
-
 
 			//Now transform the vertex positions
 			VertexTransform(VertexPositions);
 
 			//After original verts have already been transformed, recompute normals using transformed normal ref points and
 			//transformed vertex positions
-#if ENGINE_MAJOR_VERSION >= 5
 			for (int vi = 0; vi < VertexInstanceVertexIndices.Num(); ++vi)
 			{
 				Normals[vi] = (VertexPositions[VertexInstanceVertexIndices[vi]] - TempNormalRefs[vi]).GetSafeNormal(); 
 			}
-#else
-			for (const FVertexInstanceID VertexInstanceID : Desc.VertexInstances().GetElementIDs())
-			{
-				const FVertexID VertexID = Desc.GetVertexInstanceVertex(VertexInstanceID);
-				Normals[VertexInstanceID.GetValue()] = (VertexPositions[VertexID.GetValue()] - TempNormalRefs[VertexInstanceID.GetValue()]).GetSafeNormal();
-			}
-#endif
 			FStaticMeshOperations::ComputeMikktTangents(Desc, true);
 		}
 		return Descriptions;
@@ -174,12 +158,7 @@ void UStaticMeshRuntimeDescriptor::RefreshDescriptors()
 			auto& SectionInfo = OriginalMesh->GetSectionInfoMap();
 			for (int s = 0; s < SectionInfo.GetSectionNumber(i); ++s)
 			{
-#if ENGINE_MAJOR_VERSION < 5
-				MakeAccessHack(MaterialSlotNames).GetRawArray()[s]
-#else
-				MaterialSlotNames[s]
-#endif
-				= OriginalMesh->GetStaticMaterials()[SectionInfo.Get(i,s).MaterialIndex].MaterialSlotName;
+				MaterialSlotNames[s] = OriginalMesh->GetStaticMaterials()[SectionInfo.Get(i,s).MaterialIndex].MaterialSlotName;
 			}
 		}
 		(void)MarkPackageDirty();
