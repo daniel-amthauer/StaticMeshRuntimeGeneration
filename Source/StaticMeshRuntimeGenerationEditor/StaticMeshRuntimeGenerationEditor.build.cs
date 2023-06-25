@@ -18,8 +18,5 @@ public class StaticMeshRuntimeGenerationEditor : ModuleRules
 			"ContentBrowser",
 			"StaticMeshRuntimeGeneration"
 		});
- 
-		PublicIncludePaths.AddRange(new [] {"StaticMeshRuntimeGenerationEditor/Public"});
-		PrivateIncludePaths.AddRange(new [] {"StaticMeshRuntimeGenerationEditor/Private"});
 	}
 }
